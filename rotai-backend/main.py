@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import google.generativeai as genai
 import json
+import os
+from dotenv import load_dotenv
 from typing import Optional, List
 import sqlite3
 from passlib.context import CryptContext
@@ -56,7 +58,10 @@ def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 # --- GEMINI AYARLARI ---
-API_KEY = "AIzaSyBY8n4zZGLmrblojj5uU6DcrVccQX4DNOQ"
+load_dotenv()
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    raise ValueError("GEMINI_API_KEY ortam değişkeni bulunamadı. Lütfen .env dosyanızı kontrol edin.")
 genai.configure(api_key=API_KEY)
 uygun_modeller = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
 model = genai.GenerativeModel(uygun_modeller[0])
