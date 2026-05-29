@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 
 // DİKKAT: Yerel geliştirme ortamında 'localhost' mobil cihazlarda çalışmaz.
 // Kendi bilgisayarınızın yerel IP adresini veya tünel URL'sini buraya yazmalısınız.
-const BASE_URL = 'http://192.168.1.36:8000'; 
+const BASE_URL = 'http://192.168.1.33:8000'; 
 
 export interface RouteRequest {
   city: string;
