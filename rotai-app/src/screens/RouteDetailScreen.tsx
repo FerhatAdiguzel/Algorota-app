@@ -54,7 +54,7 @@ export default function RouteDetailScreen({ route, navigation }: any) {
         pace
       });
 
-      if (data.status === 'success') {
+      if (data.status === 'success' && Array.isArray(data.route_plan)) {
         const enrichedPlan = data.route_plan.map((item: any, idx: number) => ({
           ...item,
           id: item.id ? String(item.id) : `step-${idx}-${Date.now()}`

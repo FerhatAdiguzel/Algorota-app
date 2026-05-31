@@ -1,8 +1,9 @@
 import { Platform } from 'react-native';
 
 // DİKKAT: Yerel geliştirme ortamında 'localhost' mobil cihazlarda çalışmaz.
-// Kendi bilgisayarınızın yerel IP adresini veya tünel URL'sini buraya yazmalısınız.
-const BASE_URL = 'http://192.168.1.33:8000'; 
+// Web'de localhost, mobil cihazda bilgisayarınızın yerel IP adresi kullanılır.
+const LAN_IP = '172.20.10.2'; // Telefonla test için bilgisayarınızın güncel IP'si
+const BASE_URL = Platform.OS === 'web' ? 'http://localhost:8000' : `http://${LAN_IP}:8000`;
 
 export interface RouteRequest {
   city: string;

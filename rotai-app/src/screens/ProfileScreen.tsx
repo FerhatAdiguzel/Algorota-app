@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   typeBtnActive: { backgroundColor: '#3498DB' },
   typeBtnText: { fontSize: 12, color: '#7F8C8D', fontWeight: 'bold' },
   typeBtnTextActive: { color: '#FFFFFF' },
-  feedbackInput: { backgroundColor: '#F8F9F9', borderPromptColor: '#EAECEE', borderWidth: 1, borderColor: '#EAECEE', borderRadius: 10, padding: 12, fontSize: 14, textAlignVertical: 'top', height: 100, marginBottom: 15 },
+  feedbackInput: { backgroundColor: '#F8F9F9', borderWidth: 1, borderColor: '#EAECEE', borderRadius: 10, padding: 12, fontSize: 14, textAlignVertical: 'top', height: 100, marginBottom: 15 },
   feedbackSendBtn: { backgroundColor: '#2ECC71', padding: 14, borderRadius: 10, alignItems: 'center' },
   disabledBtn: { backgroundColor: '#BDC3C7' },
   feedbackSendBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },

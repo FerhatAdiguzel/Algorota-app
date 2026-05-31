@@ -63,8 +63,14 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise ValueError("GEMINI_API_KEY ortam değişkeni bulunamadı. Lütfen .env dosyanızı kontrol edin.")
 genai.configure(api_key=API_KEY)
-uygun_modeller = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-model = genai.GenerativeModel(uygun_modeller[0])
+model = None
+try:
+    uygun_modeller = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+    model = genai.GenerativeModel(uygun_modeller[0])
+except Exception as e:
+    # Gemini erişimi yoksa (geçersiz API anahtarı vb.) backend yine de açılsın;
+    # yalnızca rota üretme özelliği bu anahtar düzeltilene kadar çalışmaz.
+    print(f"[UYARI] Gemini modeli başlatılamadı: {e}. Rota üretme devre dışı, diğer özellikler çalışır.")
 
 # --- TÜRKİYE ŞEHİR VERİTABANI (REQ.F.04, REQ.F.06, REQ.F.07, REQ.F.08) ---
 CITIES_DB = [
@@ -285,6 +291,8 @@ def get_popular():
 
 @app.post("/generate-route")
 def generate_route(req: RouteRequest):
+    if model is None:
+        raise HTTPException(status_code=503, detail="Rota üretme servisi şu anda kullanılamıyor (Gemini API anahtarı geçersiz veya eksik).")
     try:
         interests_str = ", ".join(req.interests) if req.interests else "genel"
         budget_map = {"düşük": "ekonomik", "orta": "orta bütçe", "yüksek": "premium"}
@@ -294,12 +302,20 @@ def generate_route(req: RouteRequest):
         Sen profesyonel bir Türkiye gezi asistanısın. {req.city} için {req.days} günlük rota planla.
         İlgi alanları: {interests_str}. Bütçe: {budget_map.get(req.budget)}. Tempo: {pace_map.get(req.pace)}.
         Her durak için mutlaka benzersiz bir 'id' (Örn: 'd1', 'd2'), 'day' (Örn: '1. Gün'), 'time' (Örn: '09:00'), 'duration' (Örn: '2 saat'), 'title', 'desc', 'category' ('tarih', 'doğa', 'gastronomi', 'eğlence', 'kültür', 'alışveriş'), 'lat', 'lng', 'tips' (isteğe bağlı ipucu) döndür.
-        SADECE JSON döndür. Koordinatları (lat, lng) ekle.
+        Yanıt SADECE bir JSON DİZİSİ (array) olsun; kök eleman '[' ile başlamalı, herhangi bir nesne içine SARILMAMALI.
+        Açıklama, markdown veya başka metin ekleme. Koordinatları (lat, lng) ekle.
         """
         response = model.generate_content(prompt)
         ai_text = response.text.strip()
         if "```json" in ai_text:
             ai_text = ai_text.split("```json")[1].split("```")[0]
-        return {"status": "success", "route_plan": json.loads(ai_text)}
+        elif "```" in ai_text:
+            ai_text = ai_text.split("```")[1].split("```")[0]
+        parsed = json.loads(ai_text)
+        # Model bazen diziyi bir nesne içine sarabilir; her zaman düz bir liste döndür.
+        if isinstance(parsed, dict):
+            list_value = next((v for v in parsed.values() if isinstance(v, list)), None)
+            parsed = list_value if list_value is not None else [parsed]
+        return {"status": "success", "route_plan": parsed}
     except Exception as e:
         return {"status": "error", "message": str(e)}
