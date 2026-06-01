@@ -5,6 +5,8 @@ const ACTIVE_ROUTE_KEY = '@AlgoRota_ActiveRoute';
 const FAVORITES_KEY = '@AlgoRota_Favorites';
 const USER_PROFILE_KEY = '@AlgoRota_UserProfile';
 
+const THEME_KEY = '@theme_preference';
+
 export const storageService = {
   // Rotaları kaydet
   saveRoute: async (route: any) => {
@@ -27,6 +29,19 @@ export const storageService = {
     } catch (error) {
       console.error("Storage Error (getRoutes):", error);
       return [];
+    }
+  },
+
+  // Rota sil
+  removeRoute: async (routeId: string) => {
+    try {
+      const routes = await storageService.getRoutes();
+      const newRoutes = routes.filter((r: any) => r.id !== routeId);
+      await AsyncStorage.setItem(ROUTES_KEY, JSON.stringify(newRoutes));
+      return true;
+    } catch (error) {
+      console.error("Storage Error (removeRoute):", error);
+      return false;
     }
   },
 
@@ -153,6 +168,25 @@ export const storageService = {
       await AsyncStorage.multiRemove([ROUTES_KEY, ACTIVE_ROUTE_KEY, FAVORITES_KEY, USER_PROFILE_KEY, '@AlgoRota_Notifications']);
     } catch (error) {
       console.error("Storage Error (clearAll):", error);
+    }
+  },
+  
+  // Tema Tercihi
+  saveThemePreference: async (isDark: boolean) => {
+    try {
+      await AsyncStorage.setItem(THEME_KEY, JSON.stringify(isDark));
+    } catch (error) {
+      console.error('Tema tercihi kaydedilemedi', error);
+    }
+  },
+
+  getThemePreference: async () => {
+    try {
+      const value = await AsyncStorage.getItem(THEME_KEY);
+      return value ? JSON.parse(value) : false; // Default: Light mode (false)
+    } catch (error) {
+      console.error('Tema tercihi okunamadı', error);
+      return false;
     }
   }
 };

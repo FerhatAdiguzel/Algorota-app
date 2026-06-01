@@ -4,16 +4,17 @@ import { storageService } from '../services/storage';
 import { apiService } from '../services/api';
 import { useTranslation } from '../services/i18n';
 import { useIsFocused } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ProfileScreen({ navigation }: any) {
   const { t, lang, changeLang } = useTranslation();
+  const { isDark, toggleTheme, colors } = useTheme();
   const isFocused = useIsFocused();
 
   const [profile, setProfile] = useState({ name: '', email: '' });
   
   // Settings preferences
   const [notifPref, setNotifPref] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   // Feedback form states (REQ.F.18)
   const [feedbackType, setFeedbackType] = useState('uygulama');
@@ -40,6 +41,10 @@ export default function ProfileScreen({ navigation }: any) {
   const handleToggleNotif = async (value: boolean) => {
     setNotifPref(value);
     await storageService.saveNotificationPreference(value);
+  };
+
+  const handleToggleDarkMode = (value: boolean) => {
+    toggleTheme(value);
   };
 
   // REQ.NF.07 - Fast Language Switch
@@ -75,13 +80,13 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.header}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} keyboardShouldPersistTaps="handled">
+      <View style={[styles.header, { backgroundColor: colors.card }]}>
         <View style={styles.avatarContainer}>
           <Text style={styles.avatarText}>{profile.name ? profile.name[0] : 'G'}</Text>
         </View>
-        <Text style={styles.userName}>{profile.name || 'Gezgin'}</Text>
-        <Text style={styles.userEmail}>{profile.email}</Text>
+        <Text style={[styles.userName, { color: colors.text }]}>{profile.name || 'Gezgin'}</Text>
+        <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{profile.email}</Text>
         
         <TouchableOpacity 
           style={styles.editProfileButton}
@@ -92,16 +97,16 @@ export default function ProfileScreen({ navigation }: any) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('settings')}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings')}</Text>
         
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Favorites')}>
-          <Text style={styles.menuLabel}>{t('favorites')}</Text>
+        <TouchableOpacity style={[styles.menuItem, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('Favorites')}>
+          <Text style={[styles.menuLabel, { color: colors.text }]}>{t('favorites')}</Text>
           <Text style={styles.menuValue}>⭐</Text>
         </TouchableOpacity>
 
         {/* REQ.UI.20 - Persisted Notifications Preference */}
-        <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>{t('notifications')}</Text>
+        <View style={[styles.settingItem, { backgroundColor: colors.card }]}>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>{t('notifications')}</Text>
           <Switch 
             value={notifPref} 
             onValueChange={handleToggleNotif}
@@ -109,27 +114,27 @@ export default function ProfileScreen({ navigation }: any) {
           />
         </View>
 
-        <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>{t('dark_mode')}</Text>
+        <View style={[styles.settingItem, { backgroundColor: colors.card }]}>
+          <Text style={[styles.settingLabel, { color: colors.text }]}>{t('dark_mode')}</Text>
           <Switch 
-            value={darkMode} 
-            onValueChange={setDarkMode}
+            value={isDark} 
+            onValueChange={handleToggleDarkMode}
             trackColor={{ false: "#D1D1D1", true: "#3498DB" }} 
           />
         </View>
 
         {/* REQ.NF.07 - Language Switch */}
-        <TouchableOpacity style={styles.menuItem} onPress={handleToggleLanguage}>
-          <Text style={styles.menuLabel}>{t('language_selection')}</Text>
+        <TouchableOpacity style={[styles.menuItem, { backgroundColor: colors.card }]} onPress={handleToggleLanguage}>
+          <Text style={[styles.menuLabel, { color: colors.text }]}>{t('language_selection')}</Text>
           <Text style={styles.menuValue}>{lang === 'tr' ? 'Türkçe 🇹🇷' : 'English 🇬🇧'}</Text>
         </TouchableOpacity>
       </View>
 
       {/* REQ.F.18 - Geri Bildirim Gönder Bölümü */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('feedback_section')}</Text>
-        <View style={styles.feedbackCard}>
-          <Text style={styles.feedbackLabel}>{t('feedback_type_label')}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('feedback_section')}</Text>
+        <View style={[styles.feedbackCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+          <Text style={[styles.feedbackLabel, { color: colors.textSecondary }]}>{t('feedback_type_label')}</Text>
           <View style={styles.typeSelectorRow}>
             <TouchableOpacity 
               style={[styles.typeBtn, feedbackType === 'uygulama' && styles.typeBtnActive]}
@@ -150,8 +155,9 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
 
           <TextInput
-            style={styles.feedbackInput}
+            style={[styles.feedbackInput, { backgroundColor: colors.background, color: colors.text, borderColor: colors.border }]}
             placeholder={t('feedback_placeholder')}
+            placeholderTextColor={colors.textSecondary}
             multiline
             numberOfLines={4}
             value={feedbackContent}
@@ -173,13 +179,13 @@ export default function ProfileScreen({ navigation }: any) {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('email_label')}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('email_label')}</Text>
         
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuLabel}>{t('change_password')}</Text>
+        <TouchableOpacity style={[styles.menuItem, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('ForgotPassword')}>
+          <Text style={[styles.menuLabel, { color: colors.text }]}>{t('change_password')}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.replace('Login')}>
+        <TouchableOpacity style={[styles.menuItem, { backgroundColor: colors.card }]} onPress={() => navigation.replace('Login')}>
           <Text style={[styles.menuLabel, { color: '#E74C3C' }]}>{t('logout')}</Text>
         </TouchableOpacity>
       </View>

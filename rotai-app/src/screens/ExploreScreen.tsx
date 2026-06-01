@@ -4,9 +4,11 @@ import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { useTranslation } from '../services/i18n';
 import { useIsFocused } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 
 export default function ExploreScreen({ navigation }: any) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const isFocused = useIsFocused();
   const [popularCities, setPopularCities] = useState<any[]>([]);
   const [popularPlaces, setPopularPlaces] = useState<any[]>([]);
@@ -80,12 +82,12 @@ export default function ExploreScreen({ navigation }: any) {
 
   const renderCityCard = ({ item }: any) => (
     <TouchableOpacity 
-      style={styles.cityCard}
+      style={[styles.cityCard, { backgroundColor: colors.card }]}
       onPress={() => navigation.navigate('CityDetail', { cityId: item.id })}
     >
       <Image source={{ uri: item.image }} style={styles.cityImage} />
       <View style={styles.cityInfo}>
-        <Text style={styles.cityName}>{getCityIcon(item.name)} {item.name}</Text>
+        <Text style={[styles.cityName, { color: colors.text }]}>{getCityIcon(item.name)} {item.name}</Text>
         <Text style={styles.cityRegion}>{item.region}</Text>
       </View>
     </TouchableOpacity>
@@ -113,9 +115,9 @@ export default function ExploreScreen({ navigation }: any) {
 
       return (
         <View style={styles.widgetContainer}>
-          <Text style={styles.widgetTitle}>{t('widget_next_stop')}</Text>
+          <Text style={[styles.widgetTitle, { color: colors.text }]}>{t('widget_next_stop')}</Text>
           <TouchableOpacity 
-            style={styles.widgetCard}
+            style={[styles.widgetCard, { backgroundColor: colors.card }]}
             onPress={() => navigation.navigate('RouteDetail', { ...activeRoute, isSaved: true })}
           >
             <Image source={{ uri: cityImage }} style={styles.widgetImage} />
@@ -132,12 +134,12 @@ export default function ExploreScreen({ navigation }: any) {
     // Default Carousel for Inspiration
     return (
       <View style={styles.widgetContainer}>
-        <Text style={styles.widgetTitle}>{t('widget_inspiration')}</Text>
+        <Text style={[styles.widgetTitle, { color: colors.text }]}>{t('widget_inspiration')}</Text>
         <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
           {popularPlaces.slice(0, 3).map((place, index) => (
             <TouchableOpacity 
               key={index} 
-              style={styles.widgetPlaceholderCard}
+              style={[styles.widgetPlaceholderCard, { backgroundColor: colors.card }]}
               onPress={() => navigation.navigate('CityDetail', { cityId: place.city.toLowerCase() === 'istanbul' ? 'istanbul' : 'cappadocia' })}
             >
               <Image source={{ uri: place.image }} style={styles.widgetImage} />
@@ -154,16 +156,16 @@ export default function ExploreScreen({ navigation }: any) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#3498DB" />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('explore')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('explore')}</Text>
         <Text style={styles.subtitle}>{t('login_subtitle')}</Text>
       </View>
 
@@ -171,8 +173,9 @@ export default function ExploreScreen({ navigation }: any) {
 
       <View style={styles.searchContainer}>
         <TextInput 
-          style={styles.searchInput} 
+          style={[styles.searchInput, { backgroundColor: colors.card, borderColor: colors.border, color: colors.text }]} 
           placeholder={t('search_placeholder')} 
+          placeholderTextColor={colors.textSecondary}
           value={search}
           onChangeText={setSearch}
         />
@@ -189,7 +192,7 @@ export default function ExploreScreen({ navigation }: any) {
           {filteredCities.length > 0 && (
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>{t('popular_cities')}</Text>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('popular_cities')}</Text>
               </View>
               <FlatList 
                 data={filteredCities}

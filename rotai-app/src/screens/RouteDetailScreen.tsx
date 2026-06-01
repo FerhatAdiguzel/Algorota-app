@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, 
 import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { useIsFocused } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 
 const CATEGORY_ICONS: any = {
   tarih: '🏛️',
@@ -15,10 +16,13 @@ const CATEGORY_ICONS: any = {
 
 export default function RouteDetailScreen({ route, navigation }: any) {
   const isFocused = useIsFocused();
+  const { colors } = useTheme();
   const { city, days, interests, budget, pace, isSaved, id } = route.params || {};
   
   const [routeData, setRouteData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isJustSaved, setIsJustSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isSaved && route.params?.route_plan) {
@@ -45,6 +49,8 @@ export default function RouteDetailScreen({ route, navigation }: any) {
   };
 
   const generateRoute = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const data = await apiService.generateRoute({
         city,
@@ -54,24 +60,26 @@ export default function RouteDetailScreen({ route, navigation }: any) {
         pace
       });
 
-      if (data.status === 'success' && Array.isArray(data.route_plan)) {
+      if (data.status === 'success' && Array.isArray(data.route_plan) && data.route_plan.length > 0) {
         const enrichedPlan = data.route_plan.map((item: any, idx: number) => ({
           ...item,
           id: item.id ? String(item.id) : `step-${idx}-${Date.now()}`
         }));
         setRouteData(enrichedPlan); 
       } else {
-        Alert.alert("Hata", data.message || "Rota oluşturulamadı.");
+        setError(data.message || "Yapay zeka boş rota üretti. Lütfen tekrar deneyin.");
       }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Bağlantı Hatası", "Sunucuya ulaşılamadı. Lütfen internetinizi kontrol edin.");
+    } catch (err) {
+      console.error(err);
+      setError("Sunucuya ulaşılamadı. Backend çalışıyor mu kontrol edin.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleSaveRoute = async () => {
+    if (isJustSaved) return;
+
     const routeToSave = {
       id: Date.now().toString(),
       city,
@@ -84,9 +92,8 @@ export default function RouteDetailScreen({ route, navigation }: any) {
     const success = await storageService.saveRoute(routeToSave);
     if (success) {
       await storageService.setActiveRoute(routeToSave); // Kaydedilen rotayı aktif yap
-      Alert.alert("Başarılı", "Rotan başarıyla kaydedildi ve aktif rota olarak ayarlandı!", [
-        { text: "Tamam", onPress: () => navigation.navigate('MyRoutes') }
-      ]);
+      setIsJustSaved(true);
+      Alert.alert("Başarılı", "Rotan başarıyla kaydedildi ve aktif rota olarak ayarlandı!");
     } else {
       Alert.alert("Hata", "Rota kaydedilirken bir sorun oluştu.");
     }
@@ -102,21 +109,21 @@ export default function RouteDetailScreen({ route, navigation }: any) {
   };
 
   const renderRouteItem = ({ item }: any) => (
-    <View style={styles.routeCard}>
-      <View style={styles.timeContainer}>
+    <View style={[styles.routeCard, { backgroundColor: colors.card }]}>
+      <View style={[styles.timeContainer, { borderRightColor: colors.border }]}>
         <Text style={styles.categoryIcon}>{CATEGORY_ICONS[item.category] || '📍'}</Text>
-        <Text style={styles.timeText}>{item.time}</Text>
+        <Text style={[styles.timeText, { color: colors.text }]}>{item.time}</Text>
         <Text style={styles.durationText}>{item.duration}</Text>
       </View>
       <View style={styles.infoContainer}>
         <View style={styles.cardHeader}>
           <Text style={styles.dayBadge}>{item.day}</Text>
-          <Text style={styles.cardTitle}>{item.title}</Text>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
         </View>
-        <Text style={styles.cardDesc}>{item.desc}</Text>
+        <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.desc}</Text>
         {item.tips && (
-          <View style={styles.tipsContainer}>
-            <Text style={styles.tipsText}>💡 {item.tips}</Text>
+          <View style={[styles.tipsContainer, { backgroundColor: colors.background, borderLeftColor: colors.primary }]}>
+            <Text style={[styles.tipsText, { color: colors.textSecondary }]}>💡 {item.tips}</Text>
           </View>
         )}
       </View>
@@ -125,20 +132,42 @@ export default function RouteDetailScreen({ route, navigation }: any) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#3498DB" />
-        <Text style={styles.loadingText}>YZ Mutfağında Rotan Pişiyor...</Text>
+        <Text style={[styles.loadingText, { color: colors.text }]}>YZ Mutfağında Rotan Pişiyor...</Text>
         <Text style={styles.loadingSubtext}>Bu işlem yaklaşık 10 saniye sürebilir.</Text>
       </View>
     );
   }
 
+  if (error) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
+        <Text style={{ fontSize: 50, marginBottom: 20 }}>⚠️</Text>
+        <Text style={[styles.loadingText, { color: colors.text }]}>Rota Oluşturulamadı</Text>
+        <Text style={[styles.loadingSubtext, { marginBottom: 25, paddingHorizontal: 30, textAlign: 'center' }]}>{error}</Text>
+        <TouchableOpacity 
+          style={{ backgroundColor: '#3498DB', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 12 }}
+          onPress={generateRoute}
+        >
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>Tekrar Dene</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={{ marginTop: 12, paddingVertical: 10 }}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={{ color: '#7F8C8D', fontSize: 14 }}>← Geri Dön</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <View style={styles.headerTop}>
           <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text style={styles.title}>🗺️ {city} Rotan Hazır!</Text>
+            <Text style={[styles.title, { color: colors.text }]}>🗺️ {city} Rotan Hazır!</Text>
             <Text style={styles.subtitle}>{days} günlük plan.</Text>
           </View>
           <TouchableOpacity 
@@ -158,24 +187,34 @@ export default function RouteDetailScreen({ route, navigation }: any) {
         contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
       />
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, { backgroundColor: colors.card, borderTopColor: colors.border }]}>
         {isSaved ? (
           <>
             <TouchableOpacity style={styles.saveButton} onPress={handleEditRoute}>
               <Text style={styles.saveButtonText}>Rotayı Düzenle</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.background }]} onPress={() => navigation.goBack()}>
               <Text style={styles.backButtonText}>Geri</Text>
             </TouchableOpacity>
           </>
         ) : (
           <>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveRoute}>
-              <Text style={styles.saveButtonText}>Rotayı Kaydet</Text>
+            <TouchableOpacity 
+              style={[styles.saveButton, isJustSaved && { backgroundColor: '#2ECC71' }]} 
+              onPress={handleSaveRoute}
+              disabled={isJustSaved}
+            >
+              <Text style={styles.saveButtonText}>{isJustSaved ? "Rota Kaydedildi" : "Rotayı Kaydet"}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Text style={styles.backButtonText}>Düzenle</Text>
-            </TouchableOpacity>
+            {isJustSaved ? (
+              <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home', { screen: 'MyRoutes' })}>
+                <Text style={[styles.backButtonText, { color: '#3498DB' }]}>Rotalarım ➔</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Text style={styles.backButtonText}>Düzenle</Text>
+              </TouchableOpacity>
+            )}
           </>
         )}
       </View>
@@ -188,7 +227,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F7FA' },
   loadingText: { marginTop: 20, fontSize: 18, fontWeight: 'bold', color: '#2C3E50' },
   loadingSubtext: { marginTop: 8, fontSize: 14, color: '#7F8C8D' },
-  header: { padding: 25, paddingTop: 60, backgroundColor: '#FFFFFF', borderBottomLeftRadius: 25, borderBottomRightRadius: 25, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 10 },
+  header: { padding: 15, paddingTop: 15, backgroundColor: '#FFFFFF', borderBottomLeftRadius: 15, borderBottomRightRadius: 15, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 10 },
   headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   mapButton: { backgroundColor: '#EBF5FB', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 10, borderWidth: 1, borderColor: '#3498DB' },
   mapButtonText: { color: '#3498DB', fontWeight: 'bold', fontSize: 14 },

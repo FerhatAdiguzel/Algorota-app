@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, Alert, Platform } from 'react-native';
 import { storageService } from '../services/storage';
 import { useIsFocused } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
 
 export default function MyRoutesScreen({ navigation }: any) {
   const [myRoutes, setMyRoutes] = useState<any[]>([]);
+  const { colors } = useTheme();
   const isFocused = useIsFocused(); // Sayfa her odaklandığında yenile
 
   useEffect(() => {
@@ -18,17 +20,47 @@ export default function MyRoutesScreen({ navigation }: any) {
     setMyRoutes(routes);
   };
 
+  const handleDeleteRoute = (id: string) => {
+    if (Platform.OS === 'web') {
+      const confirmDelete = window.confirm("Bu rotayı silmek istediğinize emin misiniz?");
+      if (confirmDelete) {
+        storageService.removeRoute(id).then(() => loadRoutes());
+      }
+    } else {
+      Alert.alert(
+        "Rotayı Sil",
+        "Bu rotayı silmek istediğinize emin misiniz?",
+        [
+          { text: "İptal", style: "cancel" },
+          { 
+            text: "Sil", 
+            style: "destructive",
+            onPress: async () => {
+              await storageService.removeRoute(id);
+              loadRoutes();
+            }
+          }
+        ]
+      );
+    }
+  };
+
   const renderRouteCard = ({ item }: any) => (
     <TouchableOpacity 
-      style={styles.routeCard}
+      style={[styles.routeCard, { backgroundColor: colors.card }]}
       onPress={() => navigation.navigate('RouteDetail', { ...item, isSaved: true })}
     >
       <View style={styles.routeHeader}>
-        <Text style={styles.routeCity}>{item.city}</Text>
-        <Text style={styles.routeDate}>{new Date(item.created_at).toLocaleDateString('tr-TR')}</Text>
+        <Text style={[styles.routeCity, { color: colors.text }]}>{item.city}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Text style={styles.routeDate}>{new Date(item.created_at).toLocaleDateString('tr-TR')}</Text>
+          <TouchableOpacity onPress={() => handleDeleteRoute(item.id)} style={styles.deleteButton}>
+            <Text style={styles.deleteButtonText}>Sil 🗑️</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.routeInfo}>
-        <Text style={styles.routeDays}>{item.days} Günlük Plan</Text>
+      <View style={[styles.routeInfo, { borderTopColor: colors.border }]}>
+        <Text style={styles.routeDays}>{item.days} Günlük Rota</Text>
         <View style={styles.interestsRow}>
           {item.interests?.map((int: string) => (
             <Text key={int} style={styles.interestMiniTag}>#{int}</Text>
@@ -40,9 +72,9 @@ export default function MyRoutesScreen({ navigation }: any) {
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>📍</Text>
-      <Text style={styles.emptyTitle}>Henüz Rotan Yok</Text>
-      <Text style={styles.emptySubtitle}>Gezmek istediğin şehirleri seç ve yapay zeka ile rotanı hemen oluştur.</Text>
+      <Text style={styles.emptyIcon}>🗺️</Text>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>Henüz Rota Yok</Text>
+      <Text style={styles.emptySubtitle}>Yapay zeka ile kişiselleştirilmiş ilk gezi rotanızı oluşturun.</Text>
       <TouchableOpacity 
         style={styles.createButton}
         onPress={() => navigation.navigate('AddRoute')}
@@ -53,9 +85,9 @@ export default function MyRoutesScreen({ navigation }: any) {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Rota Planlarım</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Rota Planlarım</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => navigation.navigate('AddRoute')}
@@ -97,5 +129,7 @@ const styles = StyleSheet.create({
   routeInfo: { borderTopWidth: 1, borderTopColor: '#F0F3F4', paddingTop: 10 },
   routeDays: { fontSize: 15, color: '#3498DB', fontWeight: '600' },
   interestsRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 5 },
-  interestMiniTag: { fontSize: 12, color: '#7F8C8D', marginRight: 10, marginTop: 2 }
+  interestMiniTag: { fontSize: 12, color: '#7F8C8D', marginRight: 10, marginTop: 2 },
+  deleteButton: { backgroundColor: '#FFEBEB', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, marginLeft: 12, borderWidth: 1, borderColor: '#FFCACA', flexDirection: 'row', alignItems: 'center' },
+  deleteButtonText: { fontSize: 12, fontWeight: 'bold', color: '#E74C3C' }
 });

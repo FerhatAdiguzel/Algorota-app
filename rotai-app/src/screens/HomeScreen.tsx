@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Keyboa
 import { apiService } from '../services/api';
 import { locationService } from '../services/location';
 import { useTranslation } from '../services/i18n';
+import { useTheme } from '../context/ThemeContext';
 
 const INTERESTS = ['Tarih', 'Doğa', 'Gastronomi', 'Eğlence', 'Kültür', 'Alışveriş', 'Deniz'];
 
 export default function HomeScreen({ route, navigation }: any) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const [city, setCity] = useState('');
   const [days, setDays] = useState('');
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -88,17 +90,17 @@ export default function HomeScreen({ route, navigation }: any) {
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
-          <Text style={styles.greeting}>{t('welcome_title')}</Text>
+          <Text style={[styles.greeting, { color: colors.text }]}>{t('welcome_title')}</Text>
           <Text style={styles.question}>{t('welcome_subtitle')}</Text>
         </View>
 
-        <View style={styles.formCard}>
+        <View style={[styles.formCard, { backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }]}>
           <View style={styles.labelRow}>
-            <Text style={styles.label}>{t('destination_label')}</Text>
+            <Text style={[styles.label, { color: colors.text }]}>{t('destination_label')}</Text>
             {/* REQ.F.15 - Konumumu Kullan Butonu */}
             <TouchableOpacity 
               style={styles.locationBtn} 
@@ -115,8 +117,9 @@ export default function HomeScreen({ route, navigation }: any) {
 
           <View style={styles.inputContainer}>
             <TextInput 
-              style={styles.input} 
+              style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.text }]} 
               placeholder={t('destination_placeholder')}
+              placeholderTextColor={colors.textSecondary}
               value={city}
               onChangeText={handleCityChange}
             />
@@ -124,51 +127,52 @@ export default function HomeScreen({ route, navigation }: any) {
 
           {/* Autocomplete Dropdown list (REQ.UI.11) */}
           {suggestions.length > 0 && (
-            <View style={styles.suggestionsContainer}>
+            <View style={[styles.suggestionsContainer, { backgroundColor: colors.card, borderColor: colors.border }]}>
               {suggestions.map((item) => (
                 <TouchableOpacity 
                   key={item.id} 
-                  style={styles.suggestionItem}
+                  style={[styles.suggestionItem, { borderBottomColor: colors.border }]}
                   onPress={() => {
                     setCity(item.name);
                     setSuggestions([]);
                   }}
                 >
-                  <Text style={styles.suggestionText}>🏙️ {item.name} ({item.region})</Text>
+                  <Text style={[styles.suggestionText, { color: colors.text }]}>🏙️ {item.name} ({item.region})</Text>
                 </TouchableOpacity>
               ))}
             </View>
           )}
 
-          <Text style={styles.label}>{t('days_label')}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('days_label')}</Text>
           <TextInput 
-            style={styles.input} 
+            style={[styles.input, { backgroundColor: colors.background, borderColor: colors.border, color: colors.text }]} 
             placeholder={t('days_placeholder')} 
+            placeholderTextColor={colors.textSecondary}
             keyboardType="numeric"
             value={days}
             onChangeText={setDays}
           />
 
-          <Text style={styles.label}>{t('interests_label')}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('interests_label')}</Text>
           <View style={styles.tagContainer}>
             {INTERESTS.map(interest => (
               <TouchableOpacity 
                 key={interest}
                 style={[
-                  styles.tag, 
+                  styles.tag, { backgroundColor: colors.background, borderColor: colors.border },
                   selectedInterests.includes(interest) && styles.tagSelected
                 ]}
                 onPress={() => toggleInterest(interest)}
               >
                 <Text style={[
-                  styles.tagText,
+                  styles.tagText, { color: colors.textSecondary },
                   selectedInterests.includes(interest) && styles.tagTextSelected
                 ]}>{interest}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={styles.label}>{t('budget_label')}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>{t('budget_label')}</Text>
           <View style={styles.optionRow}>
             {[
               { id: 'düşük', label: t('budget_low') },
@@ -177,10 +181,10 @@ export default function HomeScreen({ route, navigation }: any) {
             ].map(b => (
               <TouchableOpacity 
                 key={b.id}
-                style={[styles.optionBtn, budget === b.id && styles.optionBtnActive]}
+                style={[styles.optionBtn, { backgroundColor: colors.background }, budget === b.id && styles.optionBtnActive]}
                 onPress={() => setBudget(b.id)}
               >
-                <Text style={[styles.optionText, budget === b.id && styles.optionTextActive]}>
+                <Text style={[styles.optionText, { color: colors.textSecondary }, budget === b.id && styles.optionTextActive]}>
                   {b.label}
                 </Text>
               </TouchableOpacity>

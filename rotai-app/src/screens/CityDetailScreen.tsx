@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
+import { useTheme } from '../context/ThemeContext';
 
 export default function CityDetailScreen({ route, navigation }: any) {
   const { cityId } = route.params;
+  const { colors, isDark } = useTheme();
   const [city, setCity] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -63,23 +65,23 @@ export default function CityDetailScreen({ route, navigation }: any) {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#3498DB" />
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
       <Image source={{ uri: city.image }} style={styles.headerImage} />
       
-      <View style={styles.content}>
+      <View style={[styles.content, { backgroundColor: colors.background }]}>
         <View style={styles.titleRow}>
           <View>
-            <Text style={styles.cityName}>{city.name}</Text>
+            <Text style={[styles.cityName, { color: colors.text }]}>{city.name}</Text>
             <Text style={styles.cityRegion}>{city.region}</Text>
           </View>
-          <TouchableOpacity style={styles.favoriteButton} onPress={handleToggleFavorite}>
+          <TouchableOpacity style={[styles.favoriteButton, isDark && { backgroundColor: '#333' }]} onPress={handleToggleFavorite}>
             <Text style={[styles.favoriteIcon, { color: isFavorite ? '#E74C3C' : '#BDC3C7' }]}>
               {isFavorite ? '❤️' : '🤍'}
             </Text>
@@ -89,7 +91,7 @@ export default function CityDetailScreen({ route, navigation }: any) {
         {/* Popüler Mekanlar (City-Specific) */}
         {popularPlaces && popularPlaces.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>🔥 Popüler Mekanlar</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>🔥 Popüler Mekanlar</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.popularPlacesScroll}>
               {popularPlaces.map((place: any, index: number) => (
                 <View key={index} style={styles.popularPlaceCard}>
@@ -104,24 +106,24 @@ export default function CityDetailScreen({ route, navigation }: any) {
           </>
         )}
 
-        <Text style={styles.sectionTitle}>📖 Hakkında</Text>
-        <Text style={styles.description}>{city.description}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>📖 Hakkında</Text>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>{city.description}</Text>
 
-        <Text style={styles.sectionTitle}>🎭 Kültür</Text>
-        <Text style={styles.description}>{city.culture}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>🎭 Kültür</Text>
+        <Text style={[styles.description, { color: colors.textSecondary }]}>{city.culture}</Text>
 
         {/* REQ.F.06 - Gezilecek Yerler listesi */}
         {city.places && city.places.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>🏛️ Gezilecek Yerler</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>🏛️ Gezilecek Yerler</Text>
             {city.places.map((place: any, index: number) => (
-              <View key={index} style={styles.placeCard}>
-                <View style={styles.placeBadge}>
+              <View key={index} style={[styles.placeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <View style={[styles.placeBadge, isDark && { backgroundColor: '#333' }]}>
                   <Text style={styles.placeIconText}>{getPlaceIcon(place.name)}</Text>
                 </View>
                 <View style={styles.placeInfo}>
-                  <Text style={styles.placeName}>{place.name}</Text>
-                  <Text style={styles.placeDesc}>{place.desc}</Text>
+                  <Text style={[styles.placeName, { color: colors.text }]}>{place.name}</Text>
+                  <Text style={[styles.placeDesc, { color: colors.textSecondary }]}>{place.desc}</Text>
                 </View>
               </View>
             ))}
@@ -131,23 +133,23 @@ export default function CityDetailScreen({ route, navigation }: any) {
         {/* REQ.F.07 & REQ.F.08 - Yemekler ve Yemek Bilgileri */}
         {city.popular_foods && city.popular_foods.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>🍲 Meşhur Lezzetler</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>🍲 Meşhur Lezzetler</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.foodListScroll}>
               {city.popular_foods.map((food: any, index: number) => (
-                <View key={index} style={styles.foodCard}>
-                  <Text style={styles.foodName}>{food.name}</Text>
-                  <Text style={styles.foodDesc}>{food.desc}</Text>
+                <View key={index} style={[styles.foodCard, isDark && { backgroundColor: '#3D3325', borderColor: '#4A3B2C' }]}>
+                  <Text style={[styles.foodName, isDark && { color: '#E59866' }]}>{food.name}</Text>
+                  <Text style={[styles.foodDesc, isDark && { color: '#D5D8DC' }]}>{food.desc}</Text>
                 </View>
               ))}
             </ScrollView>
           </>
         )}
 
-        <Text style={styles.sectionTitle}>🏷️ Etiketler</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏷️ Etiketler</Text>
         <View style={styles.tagCloud}>
           {city.tags.map((tag: string, index: number) => (
-            <View key={index} style={styles.tag}>
-              <Text style={styles.tagText}>#{tag}</Text>
+            <View key={index} style={[styles.tag, { backgroundColor: colors.card }]}>
+              <Text style={[styles.tagText, { color: colors.textSecondary }]}>#{tag}</Text>
             </View>
           ))}
         </View>

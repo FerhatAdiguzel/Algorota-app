@@ -291,31 +291,59 @@ def get_popular():
 
 @app.post("/generate-route")
 def generate_route(req: RouteRequest):
+    import re
     if model is None:
         raise HTTPException(status_code=503, detail="Rota üretme servisi şu anda kullanılamıyor (Gemini API anahtarı geçersiz veya eksik).")
-    try:
-        interests_str = ", ".join(req.interests) if req.interests else "genel"
-        budget_map = {"düşük": "ekonomik", "orta": "orta bütçe", "yüksek": "premium"}
-        pace_map = {"yavaş": "2-3 mekan/gün", "normal": "3-4 mekan/gün", "yoğun": "5-6 mekan/gün"}
 
-        prompt = f"""
-        Sen profesyonel bir Türkiye gezi asistanısın. {req.city} için {req.days} günlük rota planla.
-        İlgi alanları: {interests_str}. Bütçe: {budget_map.get(req.budget)}. Tempo: {pace_map.get(req.pace)}.
-        Her durak için mutlaka benzersiz bir 'id' (Örn: 'd1', 'd2'), 'day' (Örn: '1. Gün'), 'time' (Örn: '09:00'), 'duration' (Örn: '2 saat'), 'title', 'desc', 'category' ('tarih', 'doğa', 'gastronomi', 'eğlence', 'kültür', 'alışveriş'), 'lat', 'lng', 'tips' (isteğe bağlı ipucu) döndür.
-        Yanıt SADECE bir JSON DİZİSİ (array) olsun; kök eleman '[' ile başlamalı, herhangi bir nesne içine SARILMAMALI.
-        Açıklama, markdown veya başka metin ekleme. Koordinatları (lat, lng) ekle.
-        """
-        response = model.generate_content(prompt)
-        ai_text = response.text.strip()
-        if "```json" in ai_text:
-            ai_text = ai_text.split("```json")[1].split("```")[0]
-        elif "```" in ai_text:
-            ai_text = ai_text.split("```")[1].split("```")[0]
-        parsed = json.loads(ai_text)
-        # Model bazen diziyi bir nesne içine sarabilir; her zaman düz bir liste döndür.
-        if isinstance(parsed, dict):
-            list_value = next((v for v in parsed.values() if isinstance(v, list)), None)
-            parsed = list_value if list_value is not None else [parsed]
-        return {"status": "success", "route_plan": parsed}
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+    interests_str = ", ".join(req.interests) if req.interests else "genel"
+    budget_map = {"düşük": "ekonomik", "orta": "orta bütçe", "yüksek": "premium"}
+    pace_map = {"yavaş": "2-3 mekan/gün", "normal": "3-4 mekan/gün", "yoğun": "5-6 mekan/gün"}
+
+    prompt = f"""Sen profesyonel bir Türkiye gezi asistanısın. {req.city} için {req.days} günlük gezi rotası planla.
+İlgi alanları: {interests_str}. Bütçe: {budget_map.get(req.budget, "orta bütçe")}. Tempo: {pace_map.get(req.pace, "3-4 mekan/gün")}.
+Her gün için en az 3 farklı durak olsun. Her durak şu alanlara sahip olmalı:
+id (benzersiz, örn: "d1"), day (örn: "1. Gün"), time (örn: "09:00"), duration (örn: "2 saat"),
+title, desc, category (tarih/doğa/gastronomi/eğlence/kültür/alışveriş), lat (float), lng (float), tips.
+Yanıtın SADECE JSON dizisi olsun. Kök eleman [ ile başlasın. Markdown, açıklama veya başka metin EKLEME."""
+
+    last_error = None
+    for attempt in range(2):
+        try:
+            response = model.generate_content(prompt)
+            ai_text = response.text.strip()
+
+            # JSON bloğunu temizle
+            if "```json" in ai_text:
+                ai_text = ai_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in ai_text:
+                ai_text = ai_text.split("```")[1].split("```")[0].strip()
+
+            # Regex ile JSON dizisini bul
+            json_match = re.search(r'\[.*\]', ai_text, re.DOTALL)
+            if json_match:
+                ai_text = json_match.group(0)
+
+            parsed = json.loads(ai_text)
+
+            # Model diziyi bir nesne içine sardıysa çöz
+            if isinstance(parsed, dict):
+                list_value = next((v for v in parsed.values() if isinstance(v, list)), None)
+                parsed = list_value if list_value is not None else [parsed]
+
+            # Boş dizi kontrolü
+            if isinstance(parsed, list) and len(parsed) > 0:
+                return {"status": "success", "route_plan": parsed}
+            else:
+                last_error = "Yapay zeka boş rota döndürdü."
+                continue
+
+        except Exception as e:
+            error_str = str(e).lower()
+            # Kota / rate-limit hatası → tekrar deneme, direkt kullanıcıya bilgi ver
+            if "quota" in error_str or "rate" in error_str or "limit" in error_str or "429" in error_str or "resource" in error_str:
+                return {"status": "error", "message": "Günlük yapay zeka kullanım kotası doldu. Lütfen birkaç dakika bekleyip tekrar deneyin veya yarın tekrar kullanın."}
+            last_error = "Yapay zeka yanıt veremedi."
+            print(f"[HATA] Deneme {attempt+1}: {e}")
+            continue
+
+    return {"status": "error", "message": f"Rota oluşturulamadı. {last_error} Lütfen tekrar deneyin."}

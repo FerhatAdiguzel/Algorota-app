@@ -1,8 +1,9 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
 
 // Ekranlar
 import LoginScreen from '../screens/LoginScreen';
@@ -25,13 +26,14 @@ const Tab = createBottomTabNavigator();
 
 // Alt Navigasyon (Tab Bar) - REQ.UI.08, REQ.UI.09
 function MainTabs() {
+  const { colors } = useTheme();
   return (
     <Tab.Navigator 
       screenOptions={{ 
         headerShown: false,
-        tabBarStyle: { height: 70, paddingBottom: 15, paddingTop: 10, borderTopLeftRadius: 20, borderTopRightRadius: 20 },
-        tabBarActiveTintColor: '#3498DB',
-        tabBarInactiveTintColor: '#BDC3C7',
+        tabBarStyle: { height: 70, paddingBottom: 15, paddingTop: 10, borderTopLeftRadius: 20, borderTopRightRadius: 20, backgroundColor: colors.card, borderTopWidth: 0, elevation: 10 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
       }}
     >
       <Tab.Screen 
@@ -63,8 +65,22 @@ function MainTabs() {
 }
 
 export default function AppNavigator() {
+  const { isDark, colors } = useTheme();
+
+  const CustomTheme = {
+    ...(isDark ? DarkTheme : DefaultTheme),
+    colors: {
+      ...(isDark ? DarkTheme.colors : DefaultTheme.colors),
+      background: colors.background,
+      card: colors.card,
+      text: colors.text,
+      border: colors.border,
+      primary: colors.primary,
+    }
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={CustomTheme}>
       <Stack.Navigator initialRouteName="Login">
         {/* Auth Stack */}
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
