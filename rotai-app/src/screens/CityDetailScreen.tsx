@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIn
 import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../services/i18n';
 
 export default function CityDetailScreen({ route, navigation }: any) {
   const { cityId } = route.params;
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [city, setCity] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -91,7 +93,7 @@ export default function CityDetailScreen({ route, navigation }: any) {
         {/* Popüler Mekanlar (City-Specific) */}
         {popularPlaces && popularPlaces.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>🔥 Popüler Mekanlar</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>🔥 {t('popular_places')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.popularPlacesScroll}>
               {popularPlaces.map((place: any, index: number) => (
                 <View key={index} style={styles.popularPlaceCard}>
@@ -106,16 +108,16 @@ export default function CityDetailScreen({ route, navigation }: any) {
           </>
         )}
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>📖 Hakkında</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>📖 {t('about')}</Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>{city.description}</Text>
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>🎭 Kültür</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>🎭 {t('culture')}</Text>
         <Text style={[styles.description, { color: colors.textSecondary }]}>{city.culture}</Text>
 
         {/* REQ.F.06 - Gezilecek Yerler listesi */}
         {city.places && city.places.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>🏛️ Gezilecek Yerler</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>🏛️ {t('places_to_visit')}</Text>
             {city.places.map((place: any, index: number) => (
               <View key={index} style={[styles.placeCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
                 <View style={[styles.placeBadge, isDark && { backgroundColor: '#333' }]}>
@@ -133,7 +135,7 @@ export default function CityDetailScreen({ route, navigation }: any) {
         {/* REQ.F.07 & REQ.F.08 - Yemekler ve Yemek Bilgileri */}
         {city.popular_foods && city.popular_foods.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>🍲 Meşhur Lezzetler</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>🍲 {t('famous_foods')}</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.foodListScroll}>
               {city.popular_foods.map((food: any, index: number) => (
                 <View key={index} style={[styles.foodCard, isDark && { backgroundColor: '#3D3325', borderColor: '#4A3B2C' }]}>
@@ -145,7 +147,7 @@ export default function CityDetailScreen({ route, navigation }: any) {
           </>
         )}
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏷️ Etiketler</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏷️ {t('tags')}</Text>
         <View style={styles.tagCloud}>
           {city.tags.map((tag: string, index: number) => (
             <View key={index} style={[styles.tag, { backgroundColor: colors.card }]}>
@@ -158,7 +160,7 @@ export default function CityDetailScreen({ route, navigation }: any) {
           style={styles.generateButton}
           onPress={() => navigation.navigate('AddRoute', { preSelectedCity: city.name })}
         >
-          <Text style={styles.generateButtonText}>Bu Şehir İçin Rota Oluştur</Text>
+          <Text style={styles.generateButtonText}>{t('generate_route_for_city')}</Text>
         </TouchableOpacity>
       </View>
       <View style={{ height: 40 }} />

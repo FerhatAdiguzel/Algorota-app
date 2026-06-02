@@ -12,7 +12,7 @@ export default function ProfileScreen({ navigation }: any) {
   const isFocused = useIsFocused();
 
   const [profile, setProfile] = useState({ name: '', email: '' });
-  
+
   // Settings preferences
   const [notifPref, setNotifPref] = useState(false);
 
@@ -87,8 +87,8 @@ export default function ProfileScreen({ navigation }: any) {
         </View>
         <Text style={[styles.userName, { color: colors.text }]}>{profile.name || 'Gezgin'}</Text>
         <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{profile.email}</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.editProfileButton}
           onPress={() => navigation.navigate('EditProfile')}
         >
@@ -98,7 +98,7 @@ export default function ProfileScreen({ navigation }: any) {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('settings')}</Text>
-        
+
         <TouchableOpacity style={[styles.menuItem, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('Favorites')}>
           <Text style={[styles.menuLabel, { color: colors.text }]}>{t('favorites')}</Text>
           <Text style={styles.menuValue}>⭐</Text>
@@ -107,19 +107,19 @@ export default function ProfileScreen({ navigation }: any) {
         {/* REQ.UI.20 - Persisted Notifications Preference */}
         <View style={[styles.settingItem, { backgroundColor: colors.card }]}>
           <Text style={[styles.settingLabel, { color: colors.text }]}>{t('notifications')}</Text>
-          <Switch 
-            value={notifPref} 
+          <Switch
+            value={notifPref}
             onValueChange={handleToggleNotif}
-            trackColor={{ false: "#D1D1D1", true: "#3498DB" }} 
+            trackColor={{ false: "#D1D1D1", true: "#3498DB" }}
           />
         </View>
 
         <View style={[styles.settingItem, { backgroundColor: colors.card }]}>
           <Text style={[styles.settingLabel, { color: colors.text }]}>{t('dark_mode')}</Text>
-          <Switch 
-            value={isDark} 
+          <Switch
+            value={isDark}
             onValueChange={handleToggleDarkMode}
-            trackColor={{ false: "#D1D1D1", true: "#3498DB" }} 
+            trackColor={{ false: "#D1D1D1", true: "#3498DB" }}
           />
         </View>
 
@@ -136,7 +136,7 @@ export default function ProfileScreen({ navigation }: any) {
         <View style={[styles.feedbackCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <Text style={[styles.feedbackLabel, { color: colors.textSecondary }]}>{t('feedback_type_label')}</Text>
           <View style={styles.typeSelectorRow}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.typeBtn, feedbackType === 'uygulama' && styles.typeBtnActive]}
               onPress={() => setFeedbackType('uygulama')}
             >
@@ -144,7 +144,7 @@ export default function ProfileScreen({ navigation }: any) {
                 {t('feedback_type_app')}
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.typeBtn, feedbackType === 'rota' && styles.typeBtnActive]}
               onPress={() => setFeedbackType('rota')}
             >
@@ -164,8 +164,8 @@ export default function ProfileScreen({ navigation }: any) {
             onChangeText={setFeedbackContent}
           />
 
-          <TouchableOpacity 
-            style={[styles.feedbackSendBtn, feedbackLoading && styles.disabledBtn]} 
+          <TouchableOpacity
+            style={[styles.feedbackSendBtn, feedbackLoading && styles.disabledBtn]}
             onPress={handleSendFeedback}
             disabled={feedbackLoading}
           >
@@ -180,7 +180,7 @@ export default function ProfileScreen({ navigation }: any) {
 
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('email_label')}</Text>
-        
+
         <TouchableOpacity style={[styles.menuItem, { backgroundColor: colors.card }]} onPress={() => navigation.navigate('ForgotPassword')}>
           <Text style={[styles.menuLabel, { color: colors.text }]}>{t('change_password')}</Text>
         </TouchableOpacity>
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#FFFFFF', padding: 15, borderRadius: 12, marginBottom: 10 },
   menuLabel: { fontSize: 16, color: '#34495E' },
   menuValue: { fontSize: 14, color: '#7F8C8D' },
-  
+
   // Feedback Form Styles
   feedbackCard: { backgroundColor: '#FFFFFF', padding: 15, borderRadius: 12, borderWidth: 1, borderColor: '#E0E6ED' },
   feedbackLabel: { fontSize: 13, color: '#7F8C8D', fontWeight: '600', marginBottom: 8 },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LANG_KEY = '@AlgoRota_Language';
@@ -92,13 +92,46 @@ const translations: any = {
     change_password: 'Şifre Değiştir',
     logout: 'Çıkış Yap',
     edit_profile: 'Profili Düzenle',
-    feedback_section: 'Geri Bildirim Gönder (REQ.F.18)',
+    feedback_section: 'Geri Bildirim Gönder',
     feedback_placeholder: 'Uygulama veya rotalar hakkındaki görüşlerinizi yazın...',
     feedback_btn: 'Gönder',
     feedback_success: 'Geri bildiriminiz başarıyla iletildi. Teşekkür ederiz!',
     feedback_type_label: 'Geri Bildirim Türü',
     feedback_type_app: 'Uygulama Hakkında',
-    feedback_type_route: 'Rotalar Hakkında'
+    feedback_type_route: 'Rotalar Hakkında',
+
+    // New additions
+    no_route_yet: 'Henüz Rota Yok',
+    no_route_desc: 'Yapay zeka ile kişiselleştirilmiş ilk gezi rotanızı oluşturun.',
+    create_new_route: 'Yeni Rota Oluştur',
+    day_route: 'Günlük Rota',
+    route_is_ready: 'Rotan Hazır!',
+    day_plan: 'günlük plan.',
+    map: 'Harita',
+    try_again: 'Tekrar Dene',
+    go_back: 'Geri Dön',
+    route_failed: 'Rota Oluşturulamadı',
+    route_saved: 'Rota Kaydedildi',
+    my_routes_btn: 'Rotalarım',
+    back: 'Geri',
+    about: 'Hakkında',
+    culture: 'Kültür',
+    places_to_visit: 'Gezilecek Yerler',
+    famous_foods: 'Meşhur Lezzetler',
+    tags: 'Etiketler',
+    generate_route_for_city: 'Bu Şehir İçin Rota Oluştur',
+    route_ready_suffix: 'Rotan Hazır!',
+    success: 'Başarılı',
+    error: 'Hata',
+    save_success: 'Rotan başarıyla kaydedildi ve aktif rota olarak ayarlandı!',
+    save_error: 'Rota kaydedilirken bir sorun oluştu.',
+    ai_empty_error: 'Yapay zeka boş rota üretti. Lütfen tekrar deneyin.',
+    
+    // Headers
+    add_route_header: 'Rota Ekle',
+    route_detail_header: 'Rota Detayı',
+    city_detail_header: 'Şehir Detayı',
+    edit_route_header: 'Rotayı Düzenle'
   },
   en: {
     // Tab & Navigation
@@ -194,11 +227,56 @@ const translations: any = {
     feedback_success: 'Your feedback was successfully submitted. Thank you!',
     feedback_type_label: 'Feedback Type',
     feedback_type_app: 'About App',
-    feedback_type_route: 'About Routes'
+    feedback_type_route: 'About Routes',
+
+    // New additions
+    no_route_yet: 'No Route Yet',
+    no_route_desc: 'Create your first personalized travel route with AI.',
+    create_new_route: 'Create New Route',
+    day_route: 'Day Route',
+    route_is_ready: 'Your Route is Ready!',
+    day_plan: 'day plan.',
+    map: 'Map',
+    try_again: 'Try Again',
+    go_back: 'Go Back',
+    route_failed: 'Failed to Create Route',
+    route_saved: 'Route Saved',
+    my_routes_btn: 'My Routes',
+    back: 'Back',
+    about: 'About',
+    culture: 'Culture',
+    places_to_visit: 'Places to Visit',
+    famous_foods: 'Famous Foods',
+    tags: 'Tags',
+    generate_route_for_city: 'Generate Route for this City',
+    route_ready_suffix: 'Route is Ready!',
+    success: 'Success',
+    error: 'Error',
+    save_success: 'Your route was successfully saved and set as active!',
+    save_error: 'There was a problem saving the route.',
+    ai_empty_error: 'AI generated an empty route. Please try again.',
+    
+    // Headers
+    add_route_header: 'Add Route',
+    route_detail_header: 'Route Detail',
+    city_detail_header: 'City Detail',
+    edit_route_header: 'Edit Route'
   }
 };
 
-export const useTranslation = () => {
+type TranslationContextType = {
+  t: (key: string) => string;
+  lang: string;
+  changeLang: (newLang: string) => Promise<void>;
+};
+
+const TranslationContext = createContext<TranslationContextType>({
+  t: (key: string) => key,
+  lang: 'tr',
+  changeLang: async () => {},
+});
+
+export const TranslationProvider = ({ children }: { children: React.ReactNode }) => {
   const [lang, setLang] = useState('tr');
 
   useEffect(() => {
@@ -220,5 +298,11 @@ export const useTranslation = () => {
     return section[key] || key;
   };
 
-  return { t, lang, changeLang };
+  return (
+    <TranslationContext.Provider value={{ t, lang, changeLang }}>
+      {children}
+    </TranslationContext.Provider>
+  );
 };
+
+export const useTranslation = () => useContext(TranslationContext);

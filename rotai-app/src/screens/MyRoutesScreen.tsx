@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, Alert, Platf
 import { storageService } from '../services/storage';
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../services/i18n';
 
 export default function MyRoutesScreen({ navigation }: any) {
   const [myRoutes, setMyRoutes] = useState<any[]>([]);
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const isFocused = useIsFocused(); // Sayfa her odaklandığında yenile
 
   useEffect(() => {
@@ -55,12 +57,12 @@ export default function MyRoutesScreen({ navigation }: any) {
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={styles.routeDate}>{new Date(item.created_at).toLocaleDateString('tr-TR')}</Text>
           <TouchableOpacity onPress={() => handleDeleteRoute(item.id)} style={styles.deleteButton}>
-            <Text style={styles.deleteButtonText}>Sil 🗑️</Text>
+            <Text style={styles.deleteButtonText}>{t('delete')} 🗑️</Text>
           </TouchableOpacity>
         </View>
       </View>
       <View style={[styles.routeInfo, { borderTopColor: colors.border }]}>
-        <Text style={styles.routeDays}>{item.days} Günlük Rota</Text>
+        <Text style={styles.routeDays}>{item.days} {t('day_route')}</Text>
         <View style={styles.interestsRow}>
           {item.interests?.map((int: string) => (
             <Text key={int} style={styles.interestMiniTag}>#{int}</Text>
@@ -73,13 +75,13 @@ export default function MyRoutesScreen({ navigation }: any) {
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyIcon}>🗺️</Text>
-      <Text style={[styles.emptyTitle, { color: colors.text }]}>Henüz Rota Yok</Text>
-      <Text style={styles.emptySubtitle}>Yapay zeka ile kişiselleştirilmiş ilk gezi rotanızı oluşturun.</Text>
+      <Text style={[styles.emptyTitle, { color: colors.text }]}>{t('no_route_yet')}</Text>
+      <Text style={styles.emptySubtitle}>{t('no_route_desc')}</Text>
       <TouchableOpacity 
         style={styles.createButton}
         onPress={() => navigation.navigate('AddRoute')}
       >
-        <Text style={styles.createButtonText}>Yeni Rota Oluştur</Text>
+        <Text style={styles.createButtonText}>{t('create_new_route')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -87,7 +89,7 @@ export default function MyRoutesScreen({ navigation }: any) {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>Rota Planlarım</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{t('my_routes')}</Text>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => navigation.navigate('AddRoute')}

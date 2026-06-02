@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../services/i18n';
 
 // Ekranlar
 import LoginScreen from '../screens/LoginScreen';
@@ -27,6 +28,7 @@ const Tab = createBottomTabNavigator();
 // Alt Navigasyon (Tab Bar) - REQ.UI.08, REQ.UI.09
 function MainTabs() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   return (
     <Tab.Navigator 
       screenOptions={{ 
@@ -40,7 +42,7 @@ function MainTabs() {
         name="Explore" 
         component={ExploreScreen} 
         options={{ 
-          tabBarLabel: 'Keşfet',
+          tabBarLabel: t('explore'),
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🔍</Text>
         }} 
       />
@@ -48,7 +50,7 @@ function MainTabs() {
         name="MyRoutes" 
         component={MyRoutesScreen} 
         options={{ 
-          tabBarLabel: 'Rota Planlarım',
+          tabBarLabel: t('my_routes'),
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🗺️</Text>
         }} 
       />
@@ -56,7 +58,7 @@ function MainTabs() {
         name="Profile" 
         component={ProfileScreen} 
         options={{ 
-          tabBarLabel: 'Profilim',
+          tabBarLabel: t('profile'),
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👤</Text>
         }} 
       />
@@ -66,6 +68,7 @@ function MainTabs() {
 
 export default function AppNavigator() {
   const { isDark, colors } = useTheme();
+  const { t } = useTranslation();
 
   const CustomTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
@@ -84,21 +87,21 @@ export default function AppNavigator() {
       <Stack.Navigator initialRouteName="Login">
         {/* Auth Stack */}
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Kayıt Ol' }} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Şifre Sıfırla' }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: t('register') }} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: t('forgot_password') }} />
         <Stack.Screen name="Interests" component={InterestsScreen} options={{ headerShown: false }} />
         
         {/* Main App (Tabs) */}
         <Stack.Screen name="Home" component={MainTabs} options={{ headerShown: false }} />
         
         {/* Modal-like screens */}
-        <Stack.Screen name="AddRoute" component={HomeScreen} options={{ title: 'Rota Ekle' }} />
-        <Stack.Screen name="RouteDetail" component={RouteDetailScreen} options={{ title: 'Rota Detayı' }} />
-        <Stack.Screen name="CityDetail" component={CityDetailScreen} options={{ title: 'Şehir Detayı' }} />
-        <Stack.Screen name="EditRoute" component={EditRouteScreen} options={{ title: 'Rotayı Düzenle' }} />
+        <Stack.Screen name="AddRoute" component={HomeScreen} options={{ title: t('add_route_header') }} />
+        <Stack.Screen name="RouteDetail" component={RouteDetailScreen} options={{ title: t('route_detail_header') }} />
+        <Stack.Screen name="CityDetail" component={CityDetailScreen} options={{ title: t('city_detail_header') }} />
+        <Stack.Screen name="EditRoute" component={EditRouteScreen} options={{ title: t('edit_route_header') }} />
         <Stack.Screen name="Map" component={MapScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ title: 'Favorilerim' }} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Profili Düzenle' }} />
+        <Stack.Screen name="Favorites" component={FavoritesScreen} options={{ title: t('favorites') }} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: t('edit_profile') }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

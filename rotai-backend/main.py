@@ -117,7 +117,7 @@ CITIES_DB = [
         "id": "izmir",
         "name": "İzmir",
         "region": "Ege",
-        "image": "https://upload.wikimedia.org/wikipedia/commons/7/79/Saat_Kulesi_Konak_2012.jpg",
+        "image": "https://images.unsplash.com/photo-1608958416738-f99bbcd34df8?w=600",
         "description": "Ege'nin incisi, kozmopolit yapısı ve deniz kıyısıyla yaşam dolu şehir.",
         "culture": "Özgür ruhu, deniz kültürü ve tarihi çarşılarıyla Türkiye'nin en yaşanabilir şehirlerinden biri.",
         "popular_foods": [
@@ -172,10 +172,109 @@ CITIES_DB = [
     }
 ]
 
+
+
 POPULAR_PLACES = [
     {"id": "p1", "city": "İstanbul", "name": "Ayasofya", "category": "tarih", "rating": 4.9, "image": "https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=600&auto=format&fit=crop"},
     {"id": "p2", "city": "Kapadokya", "name": "Göreme Açık Hava Müzesi", "category": "tarih", "rating": 4.8, "image": "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?w=600&auto=format&fit=crop"},
 ]
+
+# --- ENGLISH TRANSLATIONS ---
+CITIES_EN = {
+    "istanbul": {
+        "description": "The meeting point of East and West, an exquisite city where history is lived on every corner.",
+        "culture": "Istanbul has a deep-rooted civilization where Byzantine and Ottoman cultures intertwine.",
+        "popular_foods": [
+            {"name": "Balık Ekmek", "desc": "Grilled mackerel in bread, freshly cooked on historical Eminönü boats."},
+            {"name": "Midye Dolma", "desc": "Stuffed mussels with spicy rice, an exquisite street food eaten with lots of lemon."},
+            {"name": "Simit", "desc": "Traditional Turkish bagel covered with molasses and sesame seeds."}
+        ],
+        "places": [
+            {"name": "Hagia Sophia Grand Mosque", "desc": "One of history's greatest architectural works, with a deep-rooted past as a place of worship and museum."},
+            {"name": "Topkapı Palace", "desc": "The palace where Ottoman sultans resided for centuries, exhibiting sacred relics."},
+            {"name": "Maiden's Tower", "desc": "A fascinating historical tower in the middle of the Bosphorus, holding many legends."}
+        ]
+    },
+    "ankara": {
+        "description": "The capital of Turkey, a cultural city with its historical castle and museums.",
+        "culture": "The heart of modern Turkey intertwined with Atatürk's legacy and republican history.",
+        "popular_foods": [
+            {"name": "Ankara Tavası", "desc": "A delicious regional oven dish made with lamb and barley noodle."},
+            {"name": "Beypazarı Kurusu", "desc": "A hard biscuit made with butter and cinnamon that stays fresh for a long time."}
+        ],
+        "places": [
+            {"name": "Anıtkabir", "desc": "The magnificent mausoleum which is the eternal resting place of Mustafa Kemal Atatürk."},
+            {"name": "Ankara Castle", "desc": "The castle dating back to ancient times, offering the best panorama of the city."},
+            {"name": "Museum of Anatolian Civilizations", "desc": "A rich museum shedding light on Anatolian history since the Paleolithic age."}
+        ]
+    },
+    "izmir": {
+        "description": "The pearl of the Aegean, a cosmopolitan city full of life with its coastline.",
+        "culture": "One of Turkey's most livable cities with its free spirit, sea culture and historical bazaars.",
+        "popular_foods": [
+            {"name": "Boyoz", "desc": "A delicious crispy and oily pastry similar to puff pastry, unique to Izmir."},
+            {"name": "Kumru", "desc": "Hot sandwich filled with kashar, sujuk, salami and sayas cheese inside special chickpea yeast bread."}
+        ],
+        "places": [
+            {"name": "Historical Clock Tower", "desc": "Located in Konak Square, the most known symbol and meeting point of the city."},
+            {"name": "Ephesus Ancient City", "desc": "The most magnificent trade and cultural center of the ancient world, on the world heritage list."},
+            {"name": "Kemeraltı Bazaar", "desc": "A lively open-air shopping area with historical streets, inns and shops."}
+        ]
+    },
+    "cappadocia": {
+        "description": "A unique geography with fairy chimneys, underground cities and hot air balloons.",
+        "culture": "Home to world-famous rock churches, carrying traces of Hittite, Roman and Byzantine cultures.",
+        "popular_foods": [
+            {"name": "Testi Kebab", "desc": "Kebab served by slowly cooking meat and vegetables in a clay pot over fire and breaking it at the table."},
+            {"name": "Cappadocia Manti", "desc": "Tiny and delicious Kayseri style pastry served with yogurt and butter sauce."}
+        ],
+        "places": [
+            {"name": "Göreme Open Air Museum", "desc": "A valley containing rock-cut monasteries, churches and unique frescoes."},
+            {"name": "Derinkuyu Underground City", "desc": "A massive engineering marvel underground shelter where thousands could live without going out."},
+            {"name": "Uçhisar Castle", "desc": "The highest point of Cappadocia, a natural rock castle with a bird's-eye view of fairy chimneys."}
+        ]
+    },
+    "antalya": {
+        "description": "The favorite of the Mediterranean with its turquoise coasts, ancient cities and luxury holiday opportunities.",
+        "culture": "Carries traces of Lycian civilization, giving a feeling of time travel with its historical Kaleiçi texture.",
+        "popular_foods": [
+            {"name": "Antalya Piyaz", "desc": "A unique bean salad blended with a special sauce of tahini, vinegar and garlic."},
+            {"name": "Şiş Köfte", "desc": "Lamb skewered and roasted with special spices, served with piyaz."}
+        ],
+        "places": [
+            {"name": "Kaleiçi", "desc": "The authentic heart of the city with narrow streets, historical mansions and Hadrian's Gate."},
+            {"name": "Düden Waterfall", "desc": "A fascinating natural wonder waterfall cascading from cliffs into the cool waters of the Mediterranean."},
+            {"name": "Aspendos Ancient Theater", "desc": "The best preserved ancient Roman theater, an acoustic marvel."}
+        ]
+    }
+}
+
+def translate_city(city: dict, lang: str) -> dict:
+    if lang != 'en' or city["id"] not in CITIES_EN:
+        return city
+    
+    en_data = CITIES_EN[city["id"]]
+    translated = city.copy()
+    translated["description"] = en_data["description"]
+    translated["culture"] = en_data["culture"]
+    
+    # Translate popular foods
+    translated["popular_foods"] = []
+    for orig, tr_food in zip(city["popular_foods"], en_data["popular_foods"]):
+        tf = orig.copy()
+        tf["name"] = tr_food["name"]
+        tf["desc"] = tr_food["desc"]
+        translated["popular_foods"].append(tf)
+        
+    # Translate places
+    translated["places"] = []
+    for orig, tr_place in zip(city["places"], en_data["places"]):
+        tp = orig.copy()
+        tp["name"] = tr_place["name"]
+        tp["desc"] = tr_place["desc"]
+        translated["places"].append(tp)
+        
+    return translated
 
 # --- REQUEST MODELLERİ ---
 class UserRegister(BaseModel):
@@ -271,26 +370,26 @@ def submit_feedback(req: FeedbackRequest):
 # --- GEZİ ENDPOINT'LERİ ---
 
 @app.get("/cities")
-def get_cities(search: Optional[str] = None):
-    result = CITIES_DB
+def get_cities(search: Optional[str] = None, lang: str = "tr"):
+    result = [translate_city(c, lang) for c in CITIES_DB]
     if search:
         result = [c for c in result if search.lower() in c["name"].lower()]
     return {"status": "success", "cities": result}
 
 @app.get("/cities/{city_id}")
-def get_city_detail(city_id: str):
+def get_city_detail(city_id: str, lang: str = "tr"):
     city = next((c for c in CITIES_DB if c["id"] == city_id), None)
     if not city:
         raise HTTPException(status_code=404, detail="Şehir bulunamadı")
-    return {"status": "success", "city": city}
+    return {"status": "success", "city": translate_city(city, lang)}
 
 @app.get("/popular")
-def get_popular():
-    sorted_cities = sorted(CITIES_DB, key=lambda x: x["visit_count"], reverse=True)[:5]
+def get_popular(lang: str = "tr"):
+    sorted_cities = sorted([translate_city(c, lang) for c in CITIES_DB], key=lambda x: x["visit_count"], reverse=True)[:5]
     return {"status": "success", "popular_cities": sorted_cities, "popular_places": POPULAR_PLACES}
 
 @app.post("/generate-route")
-def generate_route(req: RouteRequest):
+def generate_route(req: RouteRequest, lang: str = "tr"):
     import re
     if model is None:
         raise HTTPException(status_code=503, detail="Rota üretme servisi şu anda kullanılamıyor (Gemini API anahtarı geçersiz veya eksik).")
@@ -299,12 +398,15 @@ def generate_route(req: RouteRequest):
     budget_map = {"düşük": "ekonomik", "orta": "orta bütçe", "yüksek": "premium"}
     pace_map = {"yavaş": "2-3 mekan/gün", "normal": "3-4 mekan/gün", "yoğun": "5-6 mekan/gün"}
 
+    language_instruction = "LÜTFEN TÜM YANITINI (json içerikleri dahil) İNGİLİZCE DİLİNDE ÜRET." if lang == "en" else "Lütfen yanıtını Türkçe üret."
+
     prompt = f"""Sen profesyonel bir Türkiye gezi asistanısın. {req.city} için {req.days} günlük gezi rotası planla.
 İlgi alanları: {interests_str}. Bütçe: {budget_map.get(req.budget, "orta bütçe")}. Tempo: {pace_map.get(req.pace, "3-4 mekan/gün")}.
 Her gün için en az 3 farklı durak olsun. Her durak şu alanlara sahip olmalı:
-id (benzersiz, örn: "d1"), day (örn: "1. Gün"), time (örn: "09:00"), duration (örn: "2 saat"),
+id (benzersiz, örn: "d1"), day (örn: "1. Gün" veya "Day 1"), time (örn: "09:00"), duration (örn: "2 saat" veya "2 hours"),
 title, desc, category (tarih/doğa/gastronomi/eğlence/kültür/alışveriş), lat (float), lng (float), tips.
-Yanıtın SADECE JSON dizisi olsun. Kök eleman [ ile başlasın. Markdown, açıklama veya başka metin EKLEME."""
+Yanıtın SADECE JSON dizisi olsun. Kök eleman [ ile başlasın. Markdown, açıklama veya başka metin EKLEME.
+{language_instruction}"""
 
     last_error = None
     for attempt in range(2):

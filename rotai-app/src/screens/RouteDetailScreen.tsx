@@ -4,6 +4,7 @@ import { apiService } from '../services/api';
 import { storageService } from '../services/storage';
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../services/i18n';
 
 const CATEGORY_ICONS: any = {
   tarih: '🏛️',
@@ -17,6 +18,7 @@ const CATEGORY_ICONS: any = {
 export default function RouteDetailScreen({ route, navigation }: any) {
   const isFocused = useIsFocused();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { city, days, interests, budget, pace, isSaved, id } = route.params || {};
   
   const [routeData, setRouteData] = useState<any[]>([]);
@@ -67,11 +69,11 @@ export default function RouteDetailScreen({ route, navigation }: any) {
         }));
         setRouteData(enrichedPlan); 
       } else {
-        setError(data.message || "Yapay zeka boş rota üretti. Lütfen tekrar deneyin.");
+        setError(data.message || t('ai_empty_error'));
       }
     } catch (err) {
       console.error(err);
-      setError("Sunucuya ulaşılamadı. Backend çalışıyor mu kontrol edin.");
+      setError(t('server_error'));
     } finally {
       setLoading(false);
     }
@@ -93,9 +95,9 @@ export default function RouteDetailScreen({ route, navigation }: any) {
     if (success) {
       await storageService.setActiveRoute(routeToSave); // Kaydedilen rotayı aktif yap
       setIsJustSaved(true);
-      Alert.alert("Başarılı", "Rotan başarıyla kaydedildi ve aktif rota olarak ayarlandı!");
+      Alert.alert(t('success'), t('save_success'));
     } else {
-      Alert.alert("Hata", "Rota kaydedilirken bir sorun oluştu.");
+      Alert.alert(t('error'), t('save_error'));
     }
   };
 
@@ -134,8 +136,8 @@ export default function RouteDetailScreen({ route, navigation }: any) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color="#3498DB" />
-        <Text style={[styles.loadingText, { color: colors.text }]}>YZ Mutfağında Rotan Pişiyor...</Text>
-        <Text style={styles.loadingSubtext}>Bu işlem yaklaşık 10 saniye sürebilir.</Text>
+        <Text style={[styles.loadingText, { color: colors.text }]}>{t('loading_ai')}</Text>
+        <Text style={styles.loadingSubtext}>{t('loading_sub')}</Text>
       </View>
     );
   }
@@ -144,19 +146,19 @@ export default function RouteDetailScreen({ route, navigation }: any) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
         <Text style={{ fontSize: 50, marginBottom: 20 }}>⚠️</Text>
-        <Text style={[styles.loadingText, { color: colors.text }]}>Rota Oluşturulamadı</Text>
+        <Text style={[styles.loadingText, { color: colors.text }]}>{t('route_failed')}</Text>
         <Text style={[styles.loadingSubtext, { marginBottom: 25, paddingHorizontal: 30, textAlign: 'center' }]}>{error}</Text>
         <TouchableOpacity 
           style={{ backgroundColor: '#3498DB', paddingHorizontal: 30, paddingVertical: 14, borderRadius: 12 }}
           onPress={generateRoute}
         >
-          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>Tekrar Dene</Text>
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>{t('try_again')}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={{ marginTop: 12, paddingVertical: 10 }}
           onPress={() => navigation.goBack()}
         >
-          <Text style={{ color: '#7F8C8D', fontSize: 14 }}>← Geri Dön</Text>
+          <Text style={{ color: '#7F8C8D', fontSize: 14 }}>← {t('go_back')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -167,14 +169,14 @@ export default function RouteDetailScreen({ route, navigation }: any) {
       <View style={[styles.header, { backgroundColor: colors.card, borderBottomColor: colors.border }]}>
         <View style={styles.headerTop}>
           <View style={{ flex: 1, paddingRight: 10 }}>
-            <Text style={[styles.title, { color: colors.text }]}>🗺️ {city} Rotan Hazır!</Text>
-            <Text style={styles.subtitle}>{days} günlük plan.</Text>
+            <Text style={[styles.title, { color: colors.text }]}>🗺️ {city} {t('route_ready_suffix')}</Text>
+            <Text style={styles.subtitle}>{days} {t('day_plan')}</Text>
           </View>
           <TouchableOpacity 
             style={styles.mapButton}
             onPress={() => navigation.navigate('Map', { route_plan: routeData, city })}
           >
-            <Text style={styles.mapButtonText}>📍 Harita</Text>
+            <Text style={styles.mapButtonText}>📍 {t('map')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -191,10 +193,10 @@ export default function RouteDetailScreen({ route, navigation }: any) {
         {isSaved ? (
           <>
             <TouchableOpacity style={styles.saveButton} onPress={handleEditRoute}>
-              <Text style={styles.saveButtonText}>Rotayı Düzenle</Text>
+              <Text style={styles.saveButtonText}>{t('edit_route_title')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.background }]} onPress={() => navigation.goBack()}>
-              <Text style={styles.backButtonText}>Geri</Text>
+              <Text style={styles.backButtonText}>{t('back')}</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -204,15 +206,15 @@ export default function RouteDetailScreen({ route, navigation }: any) {
               onPress={handleSaveRoute}
               disabled={isJustSaved}
             >
-              <Text style={styles.saveButtonText}>{isJustSaved ? "Rota Kaydedildi" : "Rotayı Kaydet"}</Text>
+              <Text style={styles.saveButtonText}>{isJustSaved ? t('route_saved') : t('save_route')}</Text>
             </TouchableOpacity>
             {isJustSaved ? (
-              <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home', { screen: 'MyRoutes' })}>
-                <Text style={[styles.backButtonText, { color: '#3498DB' }]}>Rotalarım ➔</Text>
+              <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.background }]} onPress={() => navigation.navigate('Home', { screen: 'MyRoutes' })}>
+                <Text style={[styles.backButtonText, { color: '#3498DB' }]}>{t('my_routes_btn')} ➔</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                <Text style={styles.backButtonText}>Düzenle</Text>
+              <TouchableOpacity style={[styles.backButton, { backgroundColor: colors.background }]} onPress={() => navigation.goBack()}>
+                <Text style={styles.backButtonText}>{t('edit')}</Text>
               </TouchableOpacity>
             )}
           </>

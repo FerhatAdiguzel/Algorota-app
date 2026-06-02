@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // DİKKAT: Yerel geliştirme ortamında 'localhost' mobil cihazlarda çalışmaz.
 // Web'de localhost, mobil cihazda bilgisayarınızın yerel IP adresi kullanılır.
@@ -80,9 +81,11 @@ export const apiService = {
   getCities: async (search?: string, tag?: string) => {
     try {
       let url = `${BASE_URL}/cities`;
+      const lang = await AsyncStorage.getItem('@AlgoRota_Language') || 'tr';
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (tag) params.append('tag', tag);
+      params.append('lang', lang);
       if (params.toString()) url += `?${params.toString()}`;
 
       const response = await fetch(url, {
@@ -98,7 +101,8 @@ export const apiService = {
   // Şehir detayı getir (REQ.F.05)
   getCityDetail: async (cityId: string) => {
     try {
-      const response = await fetch(`${BASE_URL}/cities/${cityId}`, {
+      const lang = await AsyncStorage.getItem('@AlgoRota_Language') || 'tr';
+      const response = await fetch(`${BASE_URL}/cities/${cityId}?lang=${lang}`, {
         headers: { "Bypass-Tunnel-Reminder": "true" }
       });
       return await response.json();
@@ -111,7 +115,8 @@ export const apiService = {
   // Popüler yerleri getir (REQ.UI.07)
   getPopular: async () => {
     try {
-      const response = await fetch(`${BASE_URL}/popular`, {
+      const lang = await AsyncStorage.getItem('@AlgoRota_Language') || 'tr';
+      const response = await fetch(`${BASE_URL}/popular?lang=${lang}`, {
         headers: { "Bypass-Tunnel-Reminder": "true" }
       });
       return await response.json();
@@ -124,7 +129,8 @@ export const apiService = {
   // Rota oluştur (REQ.F.11)
   generateRoute: async (req: RouteRequest) => {
     try {
-      const response = await fetch(`${BASE_URL}/generate-route`, {
+      const lang = await AsyncStorage.getItem('@AlgoRota_Language') || 'tr';
+      const response = await fetch(`${BASE_URL}/generate-route?lang=${lang}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
